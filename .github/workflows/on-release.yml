@@ -12,7 +12,7 @@ jobs:
         mpi: [mpich, openmpi]
         include:
           - mpi: mpich
-            mpi-package: mpich mpich-dev
+            mpi-package: mpich libmpich-dev
           - mpi: openmpi
             mpi-package: openmpi-bin libopenmpi-dev
 
@@ -52,7 +52,7 @@ jobs:
         mpi: [mpich, openmpi]
         include:
           - mpi: mpich
-            mpi-package: mpich-dev
+            mpi-package: libmpich-dev
             mpi-runtime: mpich
           - mpi: openmpi
             mpi-package: libopenmpi-dev
@@ -95,7 +95,7 @@ jobs:
         mpi: [mpich, openmpi]
         include:
           - mpi: mpich
-            mpi-package: mpich-dev
+            mpi-package: libmpich-dev
           - mpi: openmpi
             mpi-package: libopenmpi-dev
 
