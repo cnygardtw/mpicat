@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        continue-on-error: [true, true]
+        continue-on-error: [true]
         mpi: [mpich, openmpi]
         include:
           - mpi: mpich
@@ -57,7 +57,7 @@ jobs:
     needs: [test-source]
     strategy:
       matrix:
-        continue-on-error: [true, true]
+        continue-on-error: [true]
         mpi: [mpich, openmpi]
         include:
           - mpi: mpich
@@ -102,7 +102,7 @@ jobs:
     needs: [test-source]
     strategy:
       matrix:
-        continue-on-error: [true, true]
+        continue-on-error: [true]
         mpi: [mpich, openmpi]
         include:
           - mpi: mpich
@@ -140,7 +140,7 @@ jobs:
     needs: [build-debian]
     strategy:
       matrix:
-        continue-on-error: [true, true]
+        continue-on-error: [true]
         mpi: [mpich, openmpi]
         include:
           - mpi: mpich
