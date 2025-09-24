@@ -15,9 +15,9 @@ jobs:
         mpi: [mpich, openmpi]
         include:
           - mpi: mpich
-            mpi-package: mpich
+            mpi-package: mpich mpich-dev
           - mpi: openmpi
-            mpi-package: openmpi-bin
+            mpi-package: openmpi-bin libopenmpi-dev
 
     steps:
     - name: Checkout code
