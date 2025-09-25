@@ -29,13 +29,13 @@
 #include <string.h>
 
 struct msg {
-	int len;
+	size_t len;
 	char data[];
 };
 
-int do_read(struct msg *msg, int count, int fd)
+int do_read(struct msg *msg, size_t count, int fd)
 {
-	int rc = 0;
+	size_t rc = 0;
 	msg->len = 0;
 	while(count) {
 		rc = read(fd, msg->data + msg->len, count);
@@ -49,8 +49,8 @@ int do_read(struct msg *msg, int count, int fd)
 
 int main(int argc, char** argv) {
 	int world_rank;
-	int buf_sz = 0x1000000; //1MB
-	int msg_sz;
+	size_t buf_sz = 0x1000000; //1MB
+	size_t msg_sz;
 	int inbox = 0;
 	long gen_count = 0;
 	size_t write_sz = 0;
