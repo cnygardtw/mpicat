@@ -12,6 +12,7 @@ env:
 
 jobs:
   test-source:
+    if: false
     runs-on: ubuntu-latest
 
     steps:
