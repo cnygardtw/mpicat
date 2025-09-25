@@ -3,7 +3,7 @@ Upstream-Name: mpicat
 Source: https://github.com/dmonakhov/mpicat
 
 Files: *
-Copyright: 2024 NVIDIA Corporation
+Copyright: 2024 Dmitry Monakhov
 License: MIT
 
 License: MIT
