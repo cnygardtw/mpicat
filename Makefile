@@ -20,7 +20,8 @@ install: mpicat
 	echo "DESTDIR: $(DESTDIR)"
 	echo "PREFIX: $(PREFIX)"
 	ls -alR
-	$(INSTALL) -d -m 755 mpicat $(DESTDIR)$(PREFIX)/bin/
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/bin/
+	$(INSTALL) -m 755 mpicat $(DESTDIR)$(PREFIX)/bin/
 
 clean:
 	rm -f mpicat
