@@ -33,8 +33,8 @@ jobs:
 
     - name: Show folder contents
       run: |
-        echo "pwd: $(pwd)"
-        ls -alR .
+        echo "pwd: `pwd`"
+        find .. -name .git -prune -o -print
 
     - name: Test mpicat functionality
       run: |
@@ -67,26 +67,28 @@ jobs:
 
     - name: Build Debian package
       run: |
-        echo "pwd: $(pwd)"
-        ls -alR .
         dpkg-buildpackage -us -uc -b
         ls -la ../*.deb
 
     - name: Show folder contents
       run: |
-        echo "pwd: $(pwd)"
-        ls -alR .
+        echo "pwd: `pwd`"
+        find .. -name .git -prune -o -print
 
     - name: Test package installation
       run: |
+        ls ..
         sudo dpkg -i ../mpicat_*.deb
         mpicat --help || echo "mpicat installed successfully"
 
+    - name: Pull up packkages
+      run: |
+        cp ../*deb .
     - name: Upload package artifacts
       uses: actions/upload-artifact@v4
       with:
         name: mpicat-debian-openmpi
-        path: ../*.deb
+        path: *.deb
         retention-days: 30
 
   build-source:
@@ -113,13 +115,17 @@ jobs:
 
     - name: Show folder contents
       run: |
-        ls -alR .
+        find .. -name .git -prune -o -print
+
+    - name: Pull up source package
+      run: |
+        cp ../*dsc ../*tar.gz ../*changes .
 
     - name: Upload source package artifacts
       uses: actions/upload-artifact@v4
       with:
         name: mpicat-source-openmpi
-        path: ../*.dsc ../*.tar.gz ../*.changes
+        path: *.dsc *.tar.gz *.changes
         retention-days: 30
 
   test-package:
@@ -140,6 +146,10 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y openmpi-bin
+
+    - name: Show packages
+      run: |
+        ls -al ./packages
 
     - name: Install package
       run: |
