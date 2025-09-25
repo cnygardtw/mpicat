@@ -125,7 +125,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: mpicat-source-openmpi
-        path: *.dsc *.tar.gz *.changes
+        path: ./*.dsc ./*.tar.gz ./*.changes
         retention-days: 30
 
   test-package:
