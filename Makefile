@@ -16,7 +16,7 @@ mpicat: mpicat.o
 
 
 install: mpicat
-	$(INSTALL) -m 755 mpicat $(DESTDIR)$(PREFIX)/bin/
+	$(INSTALL) -d -m 755 mpicat $(DESTDIR)$(PREFIX)/bin/
 
 clean:
 	rm -f mpicat
