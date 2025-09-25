@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        continue-on-error: [true]
         mpi: [mpich, openmpi]
         include:
           - mpi: mpich
@@ -54,7 +53,6 @@ jobs:
     needs: [test-source]
     strategy:
       matrix:
-        continue-on-error: [true]
         mpi: [mpich, openmpi]
         include:
           - mpi: mpich
@@ -77,6 +75,10 @@ jobs:
           devscripts \
           ${{ matrix.mpi-package }}
 
+    - name: Update version from git describe
+      run: |
+        sed 's/Version: .*/Version: $(git describe --tags)/' debian/control.template > debian/control
+
     - name: Build Debian package
       run: |
         dpkg-buildpackage -us -uc -b
@@ -87,11 +89,15 @@ jobs:
         sudo dpkg -i ../mpicat_*.deb
         mpicat --help || echo "mpicat installed successfully"
 
+    - name: Pull up package
+      run: |
+        cp ../*deb .
+
     - name: Upload package artifacts
       uses: actions/upload-artifact@v4
       with:
         name: mpicat-debian-${{ matrix.mpi }}
-        path: ../*.deb
+        path: ./*.deb
         retention-days: 30
 
   build-source:
@@ -99,7 +105,6 @@ jobs:
     needs: [test-source]
     strategy:
       matrix:
-        continue-on-error: [true, true]
         mpi: [mpich, openmpi]
         include:
           - mpi: mpich
@@ -120,16 +125,27 @@ jobs:
           devscripts \
           ${{ matrix.mpi-package }}
 
+    - name: Update version from git describe
+      run: |
+        sed 's/Version: .*/Version: $(git describe --tags)/' debian/control.template > debian/control
+
     - name: Build source package
       run: |
         dpkg-buildpackage -S
         ls -la ../*.dsc ../*.tar.gz ../*.changes
 
+    - name: Pull up source package
+      run: |
+        cp ../*dsc ../*tar.gz ../*changes .
+
     - name: Upload source package artifacts
       uses: actions/upload-artifact@v4
       with:
         name: mpicat-source-${{ matrix.mpi }}
-        path: ../*.dsc ../*.tar.gz ../*.changes
+        path: |
+          ./*.dsc
+          ./*.tar.gz
+          ./*.changes
         retention-days: 30
 
   test-package:
@@ -137,7 +153,6 @@ jobs:
     needs: [build-debian]
     strategy:
       matrix:
-        continue-on-error: [true]
         mpi: [mpich, openmpi]
         include:
           - mpi: mpich

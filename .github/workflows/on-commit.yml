@@ -65,6 +65,10 @@ jobs:
           devscripts \
           libopenmpi-dev
 
+    - name: Update version from git describe
+      run: |
+        sed 's/Version: .*/Version: $(git describe --tags)/' debian/control.template > debian/control
+
     - name: Build Debian package
       run: |
         dpkg-buildpackage -us -uc -b
@@ -107,6 +111,10 @@ jobs:
           debhelper \
           devscripts \
           libopenmpi-dev
+
+    - name: Update version from git describe
+      run: |
+        sed 's/Version: .*/Version: $(git describe --tags)/' debian/control.template > debian/control
 
     - name: Build source package
       run: |
