@@ -31,6 +31,11 @@ jobs:
       run: |
         make
 
+    - name: Show folder contents
+      run: |
+        echo "pwd: $(pwd)"
+        ls -alR .
+
     - name: Test mpicat functionality
       run: |
         echo "Testing mpicat with simple data distribution"
@@ -42,10 +47,6 @@ jobs:
         echo "Testing with larger dataset"
         dd if=/dev/urandom bs=1024 count=100 2>/dev/null | mpirun -n ${SLOTS} bash -c './mpicat | sha256sum' | sort | uniq -c | grep -c "^[ ]*${SLOTS}[ ]*"
         echo "Large data test completed"
-
-    - name: Show folder contents
-      run: |
-        ls -alR .
 
   build-debian:
     runs-on: ubuntu-latest
@@ -66,11 +67,14 @@ jobs:
 
     - name: Build Debian package
       run: |
+        echo "pwd: $(pwd)"
+        ls -alR .
         dpkg-buildpackage -us -uc -b
         ls -la ../*.deb
 
     - name: Show folder contents
       run: |
+        echo "pwd: $(pwd)"
         ls -alR .
 
     - name: Test package installation
