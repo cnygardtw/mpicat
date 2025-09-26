@@ -62,7 +62,7 @@ jobs:
 
     - name: Update version from git describe
       run: |
-        sed 's/Version: .*/Version: $(git describe --tags | sed -e 's/v//')/' debian/control.template > debian/control
+        sed 's/Version: .*/Version: $(git describe --tags | sed -e "s/v//")/' debian/control.template > debian/control
 
     - name: Build Debian package
       run: |
@@ -103,7 +103,7 @@ jobs:
 
     - name: Update version from git describe
       run: |
-        sed 's/Version: .*/Version: $(git describe --tags | sed -e 's/v//')/' debian/control.template > debian/control
+        sed 's/Version: .*/Version: $(git describe --tags | sed -e "s/v//")/' debian/control.template > debian/control
 
     - name: Build source package
       run: |
