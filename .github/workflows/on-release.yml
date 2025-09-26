@@ -2,7 +2,6 @@ name: Release Debian Package
 
 on:
   push:
-    branches: [ main, feature/*, bugfix/* ]
     tags: [ 'v*' ]
 
 env:
