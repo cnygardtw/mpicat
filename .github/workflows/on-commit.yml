@@ -31,11 +31,6 @@ jobs:
       run: |
         make
 
-    - name: Show folder contents
-      run: |
-        echo "pwd: `pwd`"
-        find .. -name .git -prune -o -print
-
     - name: Test mpicat functionality
       run: |
         echo "Testing mpicat with simple data distribution"
@@ -67,25 +62,19 @@ jobs:
 
     - name: Update version from git describe
       run: |
-        sed 's/Version: .*/Version: $(git describe --tags)/' debian/control.template > debian/control
+        sed 's/Version: .*/Version: $(git describe --tags | sed -e 's/v//')/' debian/control.template > debian/control
 
     - name: Build Debian package
       run: |
         dpkg-buildpackage -us -uc -b
         ls -la ../*.deb
 
-    - name: Show folder contents
-      run: |
-        echo "pwd: `pwd`"
-        find .. -name .git -prune -o -print
-
     - name: Test package installation
       run: |
-        ls ..
         sudo dpkg -i ../mpicat_*.deb
         mpicat --help || echo "mpicat installed successfully"
 
-    - name: Pull up packkages
+    - name: Pull up packages
       run: |
         cp ../*deb .
     - name: Upload package artifacts
@@ -114,18 +103,14 @@ jobs:
 
     - name: Update version from git describe
       run: |
-        sed 's/Version: .*/Version: $(git describe --tags)/' debian/control.template > debian/control
+        sed 's/Version: .*/Version: $(git describe --tags | sed -e 's/v//')/' debian/control.template > debian/control
 
     - name: Build source package
       run: |
         dpkg-buildpackage -S
         ls -la ../*.dsc ../*.tar.gz ../*.changes
 
-    - name: Show folder contents
-      run: |
-        find .. -name .git -prune -o -print
-
-    - name: Pull up source package
+    - name: Pull up source packages
       run: |
         cp ../*dsc ../*tar.gz ../*changes .
 
@@ -157,10 +142,6 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y openmpi-bin
-
-    - name: Show packages
-      run: |
-        ls -al ./packages
 
     - name: Install package
       run: |

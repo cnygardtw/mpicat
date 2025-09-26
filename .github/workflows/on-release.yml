@@ -1,4 +1,4 @@
-name: Build Debian Package
+name: Release Debian Package
 
 on:
   push:
@@ -11,14 +11,6 @@ env:
 jobs:
   test-source:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        mpi: [mpich, openmpi]
-        include:
-          - mpi: mpich
-            mpi-package: mpich libmpich-dev
-          - mpi: openmpi
-            mpi-package: openmpi-bin libopenmpi-dev
 
     steps:
     - name: Checkout code
@@ -31,7 +23,7 @@ jobs:
           build-essential \
           debhelper \
           devscripts \
-          ${{ matrix.mpi-package }}
+          libopenmpi-dev
 
     - name: Build mpicat
       run: |
@@ -40,28 +32,18 @@ jobs:
     - name: Test mpicat functionality
       run: |
         echo "Testing mpicat with simple data distribution"
-        echo "Hello from rank 0" | mpirun -n ${SLOTS} ./mpicat
+        echo "Hello from rank 0" | mpirun -n ${SLOTS} ./mpicat | sort | uniq -c | grep -c "^[ ]*${SLOTS}[ ]*"
         echo "Test completed successfully"
 
     - name: Test with larger data
       run: |
         echo "Testing with larger dataset"
-        dd if=/dev/urandom bs=1024 count=100 2>/dev/null | mpirun -n ${SLOTS} ./mpicat | wc -c
+        dd if=/dev/urandom bs=1024 count=100 2>/dev/null | mpirun -n ${SLOTS} bash -c './mpicat | sha256sum' | sort | uniq -c | grep -c "^[ ]*${SLOTS}[ ]*"
         echo "Large data test completed"
 
   build-debian:
     runs-on: ubuntu-latest
     needs: [test-source]
-    strategy:
-      matrix:
-        mpi: [mpich, openmpi]
-        include:
-          - mpi: mpich
-            mpi-package: libmpich-dev
-            mpi-runtime: mpich
-          - mpi: openmpi
-            mpi-package: libopenmpi-dev
-            mpi-runtime: openmpi-bin
 
     steps:
     - name: Checkout code
@@ -74,7 +56,7 @@ jobs:
           build-essential \
           debhelper \
           devscripts \
-          ${{ matrix.mpi-package }}
+          libopenmpi-dev
 
     - name: Update version from git describe
       run: |
@@ -90,28 +72,20 @@ jobs:
         sudo dpkg -i ../mpicat_*.deb
         mpicat --help || echo "mpicat installed successfully"
 
-    - name: Pull up package
+    - name: Pull up packages
       run: |
         cp ../*deb .
 
     - name: Upload package artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: mpicat-debian-${{ matrix.mpi }}
+        name: mpicat-debian-openmpi
         path: ./*.deb
         retention-days: 30
 
   build-source:
     runs-on: ubuntu-latest
     needs: [test-source]
-    strategy:
-      matrix:
-        mpi: [mpich, openmpi]
-        include:
-          - mpi: mpich
-            mpi-package: libmpich-dev
-          - mpi: openmpi
-            mpi-package: libopenmpi-dev
 
     steps:
     - name: Checkout code
@@ -124,25 +98,25 @@ jobs:
           build-essential \
           debhelper \
           devscripts \
-          ${{ matrix.mpi-package }}
+          libopenmpi-dev
 
     - name: Update version from git describe
       run: |
-        sed 's/Version: .*/Version: $(git describe --tags)/' debian/control.template > debian/control
+        sed 's/Version: .*/Version: $(git describe --tags | sed -e 's/v//')/' debian/control.template > debian/control
 
     - name: Build source package
       run: |
         dpkg-buildpackage -S
         ls -la ../*.dsc ../*.tar.gz ../*.changes
 
-    - name: Pull up source package
+    - name: Pull up source packages
       run: |
         cp ../*dsc ../*tar.gz ../*changes .
 
     - name: Upload source package artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: mpicat-source-${{ matrix.mpi }}
+        name: mpicat-source-openmpi
         path: |
           ./*.dsc
           ./*.tar.gz
@@ -152,14 +126,6 @@ jobs:
   test-package:
     runs-on: ubuntu-latest
     needs: [build-debian]
-    strategy:
-      matrix:
-        mpi: [mpich, openmpi]
-        include:
-          - mpi: mpich
-            mpi-package: mpich
-          - mpi: openmpi
-            mpi-package: openmpi-bin
 
     steps:
     - name: Checkout code
@@ -168,13 +134,13 @@ jobs:
     - name: Download package artifacts
       uses: actions/download-artifact@v4
       with:
-        name: mpicat-debian-${{ matrix.mpi }}
+        name: mpicat-debian-openmpi
         path: ./packages
 
     - name: Install MPI runtime
       run: |
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.mpi-package }}
+        sudo apt-get install -y openmpi-bin
 
     - name: Install package
       run: |
@@ -194,15 +160,7 @@ jobs:
 
   create-release:
     runs-on: ubuntu-latest
-    needs: [test-package]
-    strategy:
-      matrix:
-        mpi: [mpich, openmpi]
-        include:
-          - mpi: mpich
-            mpi-package: mpich
-          - mpi: openmpi
-            mpi-package: openmpi-bin
+    needs: [test-package, build-source]
 
     steps:
     - name: Checkout code
@@ -211,13 +169,13 @@ jobs:
     - name: Download package artifacts
       uses: actions/download-artifact@v4
       with:
-        name: mpicat-debian-${{ matrix.mpi }}
+        name: mpicat-debian-openmpi
         path: ./packages
 
     - name: Download source package artifacts
       uses: actions/download-artifact@v4
       with:
-        name: mpicat-source-${{ matrix.mpi }}
+        name: mpicat-source-openmpi
         path: ./packages
 
     - name: Release
